@@ -15,9 +15,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Adapter;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.msvi.banco.Clases.Adapters.AdapterCustomer;
 import com.msvi.banco.Clases.Cliente;
 import com.msvi.banco.Interfaces.IListarClientes;
+import com.msvi.banco.Interfaces.IReturnDelete;
 import com.msvi.banco.R;
 import com.msvi.banco.Repositories.ApiBanco;
 
@@ -27,6 +29,7 @@ public class ClientesActivity extends AppCompatActivity
 {
     ApiBanco listarCliente = new ApiBanco();
     RecyclerView recyclerView;
+    AdapterCustomer adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -45,14 +48,14 @@ public class ClientesActivity extends AppCompatActivity
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false));
     }
 
-    private void getCustomers(Context context)
+    public void getCustomers(Context context)
     {
         listarCliente.listarClientes(context, new IListarClientes()
         {
             @Override
             public void onReturnCustomers(ArrayList<Cliente> customers)
             {
-                AdapterCustomer adapter = new AdapterCustomer(customers);
+                adapter = new AdapterCustomer(customers);
                 recyclerView.setAdapter(adapter);
             }
         });
@@ -79,5 +82,30 @@ public class ClientesActivity extends AppCompatActivity
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+            case 1:
+                adapter.actualizar(item.getGroupId(), this);
+                break;
+            case 2:
+                adapter.eliminar(item.getGroupId(), this, new IReturnDelete()
+                {
+                    @Override
+                    public void onReturnDelete(boolean status)
+                    {
+                        if(status)
+                        {
+                            getCustomers(getApplicationContext());
+                        }
+                    }
+                });
+                break;
+        }
+        return super.onContextItemSelected(item);
     }
 }

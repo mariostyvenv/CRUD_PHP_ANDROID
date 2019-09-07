@@ -2,15 +2,20 @@ package com.msvi.banco.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import com.google.android.material.snackbar.Snackbar;
 import com.msvi.banco.Clases.Cliente;
+import com.msvi.banco.Interfaces.IActualizarCliente;
 import com.msvi.banco.Interfaces.IAgregarCliente;
+import com.msvi.banco.Interfaces.IConsultarCliente;
 import com.msvi.banco.R;
 import com.msvi.banco.Repositories.ApiBanco;
 import org.json.JSONException;
@@ -39,6 +44,10 @@ public class FormClienteActivity extends AppCompatActivity implements View.OnCli
         {
             entornoAgregar();
         }
+        else if(entorno.equals("actualizar"))
+        {
+            entornoActualizar();
+        }
     }
 
     private void bindViews()
@@ -57,9 +66,23 @@ public class FormClienteActivity extends AppCompatActivity implements View.OnCli
         btnEnviarForm.setOnClickListener(this);
     }
 
+    private void entornoActualizar()
+    {
+        tvForm.setText("Actualizar");
+        etIdentForm.setFocusable(false);
+        etIdentForm.setEnabled(false);
+        etIdentForm.setCursorVisible(false);
+        etIdentForm.setKeyListener(null);
+        etIdentForm.setBackgroundColor(Color.TRANSPARENT);
+
+        btnEnviarForm.setOnClickListener(this);
+        String ident = getIntent().getStringExtra("id");
+        consultarCliente(this, ident);
+    }
+
     private void agregarCliente(Cliente cliente, final View view)
     {
-        banco.AgregarCliente(this, cliente, new IAgregarCliente() {
+        banco.agregarCliente(this, cliente, new IAgregarCliente() {
             @Override
             public void onResponseAddCustomer(String respuesta)
             {
@@ -88,6 +111,60 @@ public class FormClienteActivity extends AppCompatActivity implements View.OnCli
         });
     }
 
+    private void actualizarCliente(Context context, Cliente cliente, final View view)
+    {
+        banco.actualizarCliente(context, cliente, new IActualizarCliente() {
+            @Override
+            public void onResponseStatus(String response) {
+                try
+                {
+                    JSONObject resp = new JSONObject(response);
+                    if(resp.getString("status").equals("ok"))
+                    {
+                        Intent intent = new Intent(FormClienteActivity.this, ClientesActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                    else
+                    {
+                        snackbar = Snackbar.make (view, "Ocurrio un error", Snackbar.LENGTH_SHORT);
+                        snackbar.show();
+                    }
+                }
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+    }
+
+    private void consultarCliente(Context context, String ident)
+    {
+        banco.consultarCliente(context, ident, new IConsultarCliente()
+        {
+            @Override
+            public void onResponseCustomer(String response)
+            {
+                try
+                {
+                    JSONObject resp = new JSONObject(response);
+                    JSONObject cliente = resp.getJSONObject("user");
+
+                    etIdentForm.setText(cliente.getString("ident"));
+                    etNombresForm.setText(cliente.getString("nombres"));
+                    etEmailForm.setText(cliente.getString("email"));
+                    etClaveForm.setText(cliente.getString("clave"));
+                }
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     @Override
     public void onClick(View view)
     {
@@ -101,6 +178,14 @@ public class FormClienteActivity extends AppCompatActivity implements View.OnCli
                     clienteNuevo.setEmail(etEmailForm.getText().toString());
                     clienteNuevo.setClave(etClaveForm.getText().toString());
                     agregarCliente(clienteNuevo, view);
+                }
+                else if(entorno.equals("actualizar"))
+                {
+                    clienteNuevo.setIdent(etIdentForm.getText().toString());
+                    clienteNuevo.setNombres(etNombresForm.getText().toString());
+                    clienteNuevo.setEmail(etEmailForm.getText().toString());
+                    clienteNuevo.setClave(etClaveForm.getText().toString());
+                    actualizarCliente(this, clienteNuevo, view);
                 }
                 break;
         }

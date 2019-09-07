@@ -10,7 +10,10 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.msvi.banco.Clases.Cliente;
 import com.msvi.banco.Interfaces.IAcceso;
+import com.msvi.banco.Interfaces.IActualizarCliente;
 import com.msvi.banco.Interfaces.IAgregarCliente;
+import com.msvi.banco.Interfaces.IConsultarCliente;
+import com.msvi.banco.Interfaces.IEliminarCliente;
 import com.msvi.banco.Interfaces.IListarClientes;
 
 import org.json.JSONArray;
@@ -125,7 +128,7 @@ public class ApiBanco
         queue.add(strRequest);
     }
 
-    public void AgregarCliente(Context context, final Cliente cliente, final IAgregarCliente callback)
+    public void agregarCliente(Context context, final Cliente cliente, final IAgregarCliente callback)
     {
         RequestQueue queue = Volley.newRequestQueue(context);
         StringRequest strRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>()
@@ -162,4 +165,107 @@ public class ApiBanco
 
         queue.add(strRequest);
     }
+
+    public void consultarCliente(Context context, final String ident, final IConsultarCliente callback)
+    {
+        RequestQueue queue = Volley.newRequestQueue(context);
+        StringRequest strRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>()
+        {
+            @Override
+            public void onResponse(String response)
+            {
+                callback.onResponseCustomer(response);
+            }
+        },
+        new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+
+            }
+        })
+        {
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("tipo", "consultarCuenta");
+                params.put("ident", ident);
+                return params;
+            }
+        };
+        queue.add(strRequest);
+    }
+
+    public void actualizarCliente(Context context, final Cliente cliente, final IActualizarCliente callback)
+    {
+        RequestQueue queue = Volley.newRequestQueue(context);
+        StringRequest strRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>()
+        {
+            @Override
+            public void onResponse(String response)
+            {
+                callback.onResponseStatus(response);
+            }
+        },
+        new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+
+            }
+        })
+        {
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String> params = new HashMap<String, String>();
+
+                params.put("tipo", "actualizar");
+                params.put("ident", cliente.getIdent());
+                params.put("nombres", cliente.getNombres());
+                params.put("email", cliente.getEmail());
+                params.put("clave", cliente.getClave());
+
+                return params;
+            }
+        };
+
+        queue.add(strRequest);
+    }
+    public void eliminarCliente(Context context, final String ident, final IEliminarCliente callback)
+    {
+        RequestQueue queue = Volley.newRequestQueue(context);
+        StringRequest strRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>()
+        {
+            @Override
+            public void onResponse(String response)
+            {
+                callback.onResponseStatus(response);
+            }
+        },
+        new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+
+            }
+        })
+        {
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("tipo", "eliminar");
+                params.put("ident", ident);
+                return params;
+            }
+        };
+
+        queue.add(strRequest);
+    }
+
 }
