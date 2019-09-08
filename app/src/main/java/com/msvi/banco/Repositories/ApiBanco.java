@@ -15,6 +15,7 @@ import com.msvi.banco.Interfaces.IAgregarCliente;
 import com.msvi.banco.Interfaces.IConsultarCliente;
 import com.msvi.banco.Interfaces.IEliminarCliente;
 import com.msvi.banco.Interfaces.IListarClientes;
+import com.msvi.banco.Interfaces.IReturnCreateAcount;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -261,6 +262,40 @@ public class ApiBanco
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("tipo", "eliminar");
                 params.put("ident", ident);
+                return params;
+            }
+        };
+
+        queue.add(strRequest);
+    }
+
+    public void crearCuenta(Context context, final String ident, final String saldo, final IReturnCreateAcount callback)
+    {
+        RequestQueue queue = Volley.newRequestQueue(context);
+        StringRequest strRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>()
+        {
+            @Override
+            public void onResponse(String response)
+            {
+                callback.onReturnCreateAcount(response);
+            }
+        },
+        new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+
+            }
+        })
+        {
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("tipo", "crearCuenta");
+                params.put("ident", ident);
+                params.put("saldo", saldo);
                 return params;
             }
         };

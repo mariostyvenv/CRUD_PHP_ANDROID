@@ -48,14 +48,14 @@ public class ClientesActivity extends AppCompatActivity
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false));
     }
 
-    public void getCustomers(Context context)
+    private void getCustomers(Context context)
     {
         listarCliente.listarClientes(context, new IListarClientes()
         {
             @Override
             public void onReturnCustomers(ArrayList<Cliente> customers)
             {
-                adapter = new AdapterCustomer(customers);
+                adapter = new AdapterCustomer(customers, ClientesActivity.this);
                 recyclerView.setAdapter(adapter);
             }
         });

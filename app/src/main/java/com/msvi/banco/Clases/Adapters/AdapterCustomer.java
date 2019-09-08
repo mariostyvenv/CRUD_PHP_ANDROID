@@ -1,5 +1,6 @@
 package com.msvi.banco.Clases.Adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.ContextMenu;
@@ -11,7 +12,9 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.snackbar.Snackbar;
+import com.msvi.banco.Activities.ClientesActivity;
 import com.msvi.banco.Activities.FormClienteActivity;
+import com.msvi.banco.Activities.VerClienteActivity;
 import com.msvi.banco.Clases.Cliente;
 import com.msvi.banco.Interfaces.IEliminarCliente;
 import com.msvi.banco.Interfaces.IReturnDelete;
@@ -26,11 +29,13 @@ public class AdapterCustomer extends RecyclerView.Adapter<AdapterCustomer.ViewHo
     ArrayList<Cliente> listaClientes;
     Snackbar snackbar;
     Cliente cliente;
+    Activity activity;
     ApiBanco banco = new ApiBanco();
 
-    public AdapterCustomer(ArrayList<Cliente> listaClientes)
+    public AdapterCustomer(ArrayList<Cliente> listaClientes, Activity activity)
     {
         this.listaClientes = listaClientes;
+        this.activity = activity;
     }
 
     @NonNull
@@ -54,8 +59,10 @@ public class AdapterCustomer extends RecyclerView.Adapter<AdapterCustomer.ViewHo
             public void onClick(View view)
             {
                 Cliente c = listaClientes.get(position);
-                snackbar = Snackbar.make (view, "Has seleccionado "+ c.getIdent(), Snackbar.LENGTH_SHORT);
-                snackbar.show();
+                Intent intent = new Intent(view.getContext(), VerClienteActivity.class);
+                intent.putExtra("ident",c.getIdent());
+                view.getContext().startActivity(intent);
+                activity.finish();
             }
         });
     }
