@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Adapter;
+import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.msvi.banco.Clases.Adapters.AdapterCustomer;
@@ -78,6 +79,11 @@ public class ClientesActivity extends AppCompatActivity
                 Intent intent = new Intent(this, FormClienteActivity.class);
                 intent.putExtra("tipo","agregar");
                 startActivity(intent);
+                finish();
+                break;
+            case R.id.verTransacciones:
+                Intent intent2 = new Intent(this, ListarTransaccionesActivity.class);
+                startActivity(intent2);
                 finish();
                 break;
         }

@@ -12,7 +12,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Activities.VerClienteActivity"></activity>
+        <activity android:name=".Activities.ListarTransaccionesActivity"></activity>
+        <activity android:name=".Activities.VerClienteActivity" />
         <activity android:name=".Activities.FormClienteActivity" />
         <activity android:name=".Activities.ClientesActivity" />
         <activity android:name=".Activities.LoginActivity">

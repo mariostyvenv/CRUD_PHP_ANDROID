@@ -1,6 +1,7 @@
 package com.msvi.banco.Repositories;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -16,6 +17,7 @@ import com.msvi.banco.Interfaces.IConsultarCliente;
 import com.msvi.banco.Interfaces.IEliminarCliente;
 import com.msvi.banco.Interfaces.IListarClientes;
 import com.msvi.banco.Interfaces.IReturnCreateAcount;
+import com.msvi.banco.Interfaces.IReturnTransferencia;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -244,6 +246,7 @@ public class ApiBanco
             @Override
             public void onResponse(String response)
             {
+                Log.w("msvi", response);
                 callback.onResponseStatus(response);
             }
         },
@@ -296,6 +299,73 @@ public class ApiBanco
                 params.put("tipo", "crearCuenta");
                 params.put("ident", ident);
                 params.put("saldo", saldo);
+                return params;
+            }
+        };
+
+        queue.add(strRequest);
+    }
+
+    public void realizarTransaccion(Context context, final String cuentaOrigen, final String cuentaDestino, final String valor, final IReturnTransferencia callback)
+    {
+        RequestQueue queue = Volley.newRequestQueue(context);
+        StringRequest strRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>()
+        {
+            @Override
+            public void onResponse(String response)
+            {
+                callback.onResponseTransfer(response);
+            }
+        },
+        new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+
+            }
+        })
+        {
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("tipo", "realizarTransaccion");
+                params.put("cuentaOrigen", cuentaOrigen);
+                params.put("cuentaDestino", cuentaDestino);
+                params.put("valor", valor);
+                return params;
+            }
+        };
+
+        queue.add(strRequest);
+    }
+    public void consultarTransacciones(Context context, final String ident, final IReturnTransferencia callback)
+    {
+        RequestQueue queue = Volley.newRequestQueue(context);
+        StringRequest strRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>()
+        {
+            @Override
+            public void onResponse(String response)
+            {
+                callback.onResponseTransfer(response);
+            }
+        },
+        new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+
+            }
+        })
+        {
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("tipo", "consultarTransacciones");
+                params.put("ident", ident);
                 return params;
             }
         };

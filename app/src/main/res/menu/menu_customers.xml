@@ -6,4 +6,9 @@
         android:title="Agregar cliente"
         app:showAsAction="ifRoom"></item>
 
+    <item android:id="@+id/verTransacciones"
+        android:icon="@drawable/ic_send"
+        android:title="Transacciones"
+        app:showAsAction="ifRoom"></item>
+
 </menu>

@@ -6,7 +6,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -16,20 +19,23 @@ import android.widget.Toast;
 
 import com.msvi.banco.Interfaces.IConsultarCliente;
 import com.msvi.banco.Interfaces.IReturnCreateAcount;
+import com.msvi.banco.Interfaces.IReturnTransferencia;
 import com.msvi.banco.R;
 import com.msvi.banco.Repositories.ApiBanco;
+import com.msvi.banco.Repositories.PersonalAccount;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class VerClienteActivity extends AppCompatActivity implements View.OnClickListener
 {
 
     TextView etIdentCliente, etNombreCliente, etEmailCliente, etNroCuentaCliente, etSaldoCliente;
-    Button btnCrearCuenta;
+    Button btnCrearCuenta, btnTransferir;
     ApiBanco banco = new ApiBanco();
-    String saldoObtenido, ident;
-
+    String saldoObtenido, ident, cuentaDestino;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -48,7 +54,11 @@ public class VerClienteActivity extends AppCompatActivity implements View.OnClic
         etNroCuentaCliente = findViewById(R.id.etNroCuentaCliente);
         etSaldoCliente = findViewById(R.id.etSaldoCliente);
         btnCrearCuenta = findViewById(R.id.btnCrearCuenta);
+        btnTransferir = findViewById(R.id.btnTransferir);
+
         btnCrearCuenta.setOnClickListener(this);
+        btnTransferir.setOnClickListener(this);
+
     }
 
     private void getClientes(Context context, final String ident)
@@ -72,15 +82,19 @@ public class VerClienteActivity extends AppCompatActivity implements View.OnClic
                         etEmailCliente.setText(cliente.getString("email"));
                         etNroCuentaCliente.setText("NO TIENE CUENTA");
                         etSaldoCliente.setText("NO TIENE SALDO");
+                        btnTransferir.setVisibility(View.INVISIBLE);
                     }
                     else
                     {
+                        retornarCuentaDestino(cliente.getString("nrocuenta"));
+
                         etIdentCliente.setText(cliente.getString("ident"));
                         etNombreCliente.setText(cliente.getString("nombres"));
                         etEmailCliente.setText(cliente.getString("email"));
                         etNroCuentaCliente.setText(cliente.getString("nrocuenta"));
                         etSaldoCliente.setText("$"+cliente.getString("saldo"));
                         btnCrearCuenta.setVisibility(View.INVISIBLE);
+                        //Aquí validar que el cliente tiene cuenta
                     }
                 }
                 catch (JSONException e)
@@ -92,7 +106,7 @@ public class VerClienteActivity extends AppCompatActivity implements View.OnClic
         });
     }
 
-    public void showChangeLangDialog()
+    public void showChangeLangDialog(final String estado)
     {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
@@ -108,27 +122,64 @@ public class VerClienteActivity extends AppCompatActivity implements View.OnClic
         {
             public void onClick(DialogInterface dialog, int whichButton)
             {
-                retornarSaldo(saldo.getText().toString());
-                banco.crearCuenta(VerClienteActivity.this, ident, saldoObtenido, new IReturnCreateAcount() {
-                    @Override
-                    public void onReturnCreateAcount(String response)
-                    {
-                        try
+                if(estado.equals("crear"))
+                {
+                    retornarSaldo(saldo.getText().toString());
+                    banco.crearCuenta(VerClienteActivity.this, ident, saldoObtenido, new IReturnCreateAcount() {
+                        @Override
+                        public void onReturnCreateAcount(String response)
                         {
-                            JSONObject r = new JSONObject(response);
-                            if(r.getString("status").equals("ok"))
+                            try
                             {
-                                Intent intent = new Intent(VerClienteActivity.this, ClientesActivity.class);
-                                startActivity(intent);
-                                finish();
+                                JSONObject r = new JSONObject(response);
+                                if(r.getString("status").equals("ok"))
+                                {
+                                    Intent intent = new Intent(VerClienteActivity.this, ClientesActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            }
+                            catch (JSONException e)
+                            {
+                                e.printStackTrace();
                             }
                         }
-                        catch (JSONException e)
+                    });
+                }
+                else if(estado.equals("transferir"))
+                {
+                    retornarSaldo(saldo.getText().toString());
+
+                    PersonalAccount personal = new PersonalAccount();
+                    ArrayList<String> p = personal.getPersonal(getApplicationContext());
+
+                    banco.realizarTransaccion(VerClienteActivity.this, p.get(1), cuentaDestino, saldoObtenido, new IReturnTransferencia() {
+                        @Override
+                        public void onResponseTransfer(String response)
                         {
-                            e.printStackTrace();
+                            try
+                            {
+                                JSONObject r = new JSONObject(response);
+                                Log.w("msvi", response);
+                                if(r.getString("estatus").equals("ok"))
+                                {
+                                    Intent intent = new Intent(VerClienteActivity.this, ClientesActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                                else
+                                {
+                                    Toast.makeText(VerClienteActivity.this, "TRANSFERENCIA FALLIDA", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                            catch (JSONException e)
+                            {
+                                e.printStackTrace();
+                            }
+
                         }
-                    }
-                });
+                    });
+                }
             }
         });
 
@@ -142,15 +193,11 @@ public class VerClienteActivity extends AppCompatActivity implements View.OnClic
         AlertDialog b = dialogBuilder.create();
         b.show();
     }
-    public void retornarSaldo(String saldo)
-    {
-        this.saldoObtenido = saldo;
-    }
+    public void retornarSaldo(String saldo) { this.saldoObtenido = saldo; }
 
-    public  void retornarIdent(String ident)
-    {
-        this.ident = ident;
-    }
+    public void retornarIdent(String ident) { this.ident = ident; }
+
+    public void retornarCuentaDestino(String cuenta){this.cuentaDestino = cuenta;}
 
     @Override
     public void onBackPressed()
@@ -167,7 +214,11 @@ public class VerClienteActivity extends AppCompatActivity implements View.OnClic
         switch (view.getId())
         {
             case R.id.btnCrearCuenta:
-                showChangeLangDialog();
+                showChangeLangDialog("crear");
+                break;
+
+            case R.id.btnTransferir:
+                showChangeLangDialog("transferir");
                 break;
         }
     }

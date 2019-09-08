@@ -2,8 +2,11 @@ package com.msvi.banco.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,6 +16,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.msvi.banco.Interfaces.IAcceso;
 import com.msvi.banco.R;
 import com.msvi.banco.Repositories.ApiBanco;
+import com.msvi.banco.Repositories.PersonalAccount;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,6 +72,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 {
                     progressBar.setVisibility(View.INVISIBLE);
                     JSONObject obj = new JSONObject(result);
+                    JSONObject client = obj.getJSONObject("user");
+                    Log.w("msvi", result);
+
+                    PersonalAccount personal = new PersonalAccount();
+                    personal.createPersonal(LoginActivity.this, client.getString("ident"), client.getString("nrocuenta"));
                     String status = obj.getString("estatus");
 
                     if(status.equals("ok"))
@@ -76,6 +85,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         snackbar.show();
                         Intent intent = new Intent(getApplicationContext(), ClientesActivity.class);
                         startActivity(intent);
+                        finish();
                     }
                     else if(status.equals("error"))
                     {
@@ -91,6 +101,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 catch (JSONException e)
                 {
                     snackbar = Snackbar.make (view, "Ocurrió un error", Snackbar.LENGTH_LONG);
+                    Log.w("msvi", e.toString());
                     snackbar.show();
                 }
             }
