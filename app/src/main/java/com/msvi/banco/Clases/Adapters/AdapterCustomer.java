@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.snackbar.Snackbar;
-import com.msvi.banco.Activities.ClientesActivity;
 import com.msvi.banco.Activities.FormClienteActivity;
 import com.msvi.banco.Activities.VerClienteActivity;
 import com.msvi.banco.Clases.Cliente;
@@ -103,16 +102,17 @@ public class AdapterCustomer extends RecyclerView.Adapter<AdapterCustomer.ViewHo
         }
 
     }
-    public void actualizar(int position, Context context)
+    public void actualizar(int position, Context context, Activity activity)
     {
         cliente = listaClientes.get(position);
         Intent intent = new Intent(context, FormClienteActivity.class);
         intent.putExtra("tipo","actualizar");
         intent.putExtra("id",cliente.getIdent());
         context.startActivity(intent);
+        activity.finish();
     }
 
-    public void eliminar(int position, final Context context, final IReturnDelete callback)
+    public void eliminar(int position, final View view, final Context context, final IReturnDelete callback)
     {
         cliente = listaClientes.get(position);
         banco.eliminarCliente(context, cliente.getIdent(), new IEliminarCliente()
@@ -126,6 +126,8 @@ public class AdapterCustomer extends RecyclerView.Adapter<AdapterCustomer.ViewHo
                     if(resp.getString("status").equals("ok"))
                     {
                         callback.onReturnDelete(true);
+
+                        Snackbar.make(view, "ELIMINACION CORRECTA", Snackbar.LENGTH_LONG).show();
                     }
                     else
                     {

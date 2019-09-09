@@ -2,6 +2,7 @@ package com.msvi.banco.Activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -13,7 +14,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Adapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -37,9 +40,9 @@ public class ClientesActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_clientes);
-
         bindViews();
         getCustomers(getApplicationContext());
+        validateIntents(getIntent());
     }
 
     @SuppressLint("WrongConstant")
@@ -60,6 +63,25 @@ public class ClientesActivity extends AppCompatActivity
                 recyclerView.setAdapter(adapter);
             }
         });
+    }
+    private void validateIntents(Intent intent)
+    {
+        if(intent.getStringExtra("tipo")!= null)
+        {
+            String tipo = intent.getStringExtra("tipo");
+            if(tipo.equals("actualizacion"))
+            {
+                Snackbar.make(findViewById(R.id.viewCustosmers), "ACTUALIZACION CORRECTA", Snackbar.LENGTH_LONG).show();
+            }
+            else if(tipo.equals("agregado"))
+            {
+                Snackbar.make(findViewById(R.id.viewCustosmers), "AGREGADO CORRECTAMENTE", Snackbar.LENGTH_LONG).show();
+            }
+            else if(tipo.equals("transferencia"))
+            {
+                Snackbar.make(findViewById(R.id.viewCustosmers), "TRANSFERENCIA CORRECTA", Snackbar.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override
@@ -96,10 +118,11 @@ public class ClientesActivity extends AppCompatActivity
         switch (item.getItemId())
         {
             case 1:
-                adapter.actualizar(item.getGroupId(), this);
+                adapter.actualizar(item.getGroupId(), this, ClientesActivity.this);
                 break;
             case 2:
-                adapter.eliminar(item.getGroupId(), this, new IReturnDelete()
+
+                adapter.eliminar(item.getGroupId(),findViewById(R.id.viewCustosmers),this, new IReturnDelete()
                 {
                     @Override
                     public void onReturnDelete(boolean status)

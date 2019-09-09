@@ -94,6 +94,7 @@ public class FormClienteActivity extends AppCompatActivity implements View.OnCli
                         snackbar = Snackbar.make (view, "Agregado correctamente", Snackbar.LENGTH_SHORT);
                         snackbar.show();
                         Intent intent = new Intent(FormClienteActivity.this, ClientesActivity.class);
+                        intent.putExtra("tipo","agregado");
                         startActivity(intent);
                         finish();
                     }
@@ -122,6 +123,7 @@ public class FormClienteActivity extends AppCompatActivity implements View.OnCli
                     if(resp.getString("status").equals("ok"))
                     {
                         Intent intent = new Intent(FormClienteActivity.this, ClientesActivity.class);
+                        intent.putExtra("tipo","actualizacion");
                         startActivity(intent);
                         finish();
                     }

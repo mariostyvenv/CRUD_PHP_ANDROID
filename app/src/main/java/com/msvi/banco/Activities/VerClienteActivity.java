@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.msvi.banco.Interfaces.IConsultarCliente;
 import com.msvi.banco.Interfaces.IReturnCreateAcount;
 import com.msvi.banco.Interfaces.IReturnTransferencia;
@@ -106,7 +107,7 @@ public class VerClienteActivity extends AppCompatActivity implements View.OnClic
         });
     }
 
-    public void showChangeLangDialog(final String estado)
+    public void dialogSaldo(final String estado, final View view)
     {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
@@ -160,16 +161,29 @@ public class VerClienteActivity extends AppCompatActivity implements View.OnClic
                             try
                             {
                                 JSONObject r = new JSONObject(response);
-                                Log.w("msvi", response);
+                                Log.w("msvi", r.toString());
                                 if(r.getString("estatus").equals("ok"))
                                 {
                                     Intent intent = new Intent(VerClienteActivity.this, ClientesActivity.class);
+                                    intent.putExtra("tipo","transferencia");
                                     startActivity(intent);
                                     finish();
                                 }
                                 else
                                 {
-                                    Toast.makeText(VerClienteActivity.this, "TRANSFERENCIA FALLIDA", Toast.LENGTH_LONG).show();
+                                    Log.w("msvi",r.getString("message"));
+                                    if(r.getString("message").equals("saldo insuficiente"))
+                                    {
+                                        Snackbar.make(view, "Saldo Insuficiente", Snackbar.LENGTH_SHORT).show();
+                                    }
+                                    else if(r.getString("message").equals("no puede enviar cantidades menores a 1"))
+                                    {
+                                        Snackbar.make(view, "No puede enviar menos que 1$", Snackbar.LENGTH_SHORT).show();
+                                    }
+                                    else
+                                    {
+                                        Snackbar.make(view, r.getString("message"), Snackbar.LENGTH_SHORT).show();
+                                    }
                                 }
                             }
                             catch (JSONException e)
@@ -214,11 +228,11 @@ public class VerClienteActivity extends AppCompatActivity implements View.OnClic
         switch (view.getId())
         {
             case R.id.btnCrearCuenta:
-                showChangeLangDialog("crear");
+                dialogSaldo("crear", view);
                 break;
 
             case R.id.btnTransferir:
-                showChangeLangDialog("transferir");
+                dialogSaldo("transferir", view);
                 break;
         }
     }

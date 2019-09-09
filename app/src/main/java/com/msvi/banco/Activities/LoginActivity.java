@@ -100,7 +100,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 }
                 catch (JSONException e)
                 {
-                    snackbar = Snackbar.make (view, "Ocurrió un error", Snackbar.LENGTH_LONG);
+                    snackbar = Snackbar.make (view, "Correo o contraseña incorrectos", Snackbar.LENGTH_LONG);
                     Log.w("msvi", e.toString());
                     snackbar.show();
                 }
